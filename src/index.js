@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs/promises');
 const path = require('path');
+const caract = require('crypto');
 
 const app = express();
 
@@ -8,6 +9,12 @@ const talkerPath = path.resolve(__dirname, './talker.json');
 
 app.use(express.json());
 
+function randomToken(size = 16) {
+  return caract
+    .randomBytes(size)
+    .toString('base64')
+    .slice(0, size);
+}
 const readJson = async () => {
   try {
     const talk = await fs.readFile(talkerPath);
@@ -41,6 +48,21 @@ app.get('/talker/:id', async (req, res) => {
     res.status(200).json(talkers);
   } catch (error) {
     res.status(400).send({ message: error.message });
+  }
+});
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const newTok = {
+    token: randomToken(),
+  };
+  try {
+    if (email && password) {
+    return res.status(200).json(newTok);
+    } 
+    return res.status(404).send({ message: 'email e senha invalidos ' });
+  } catch (error) {
+    return res.status(404).send({ message: error.message });
   }
 });
 
