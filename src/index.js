@@ -30,6 +30,20 @@ app.get('/talker', async (req, res) => {
   }
 });
 
+app.get('/talker/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const readF = await readJson();
+    const talkers = readF.find((talk) => talk.id === Number(id));
+    if (!talkers) {
+      return res.status(404).send({ message: 'Pessoa palestrante não encontrada' });
+    }
+    res.status(200).json(talkers);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
+
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
