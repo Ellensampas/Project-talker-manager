@@ -15,6 +15,7 @@ function randomToken(size = 16) {
     .toString('base64')
     .slice(0, size);
 }
+
 const readJson = async () => {
   try {
     const talk = await fs.readFile(talkerPath);
@@ -51,19 +52,33 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
+const verificaEm = (email) => {
+  const Regex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i;
+  const verifica = Regex.test(email);
+  return verifica;
+};
+const comparacoes = (el) => {
+  const compa = el === null || el === '' || el === undefined;
+  return compa;
+};
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  const newTok = {
-    token: randomToken(),
-  };
-  try {
-    if (email && password) {
-    return res.status(200).json(newTok);
-    } 
-    return res.status(404).send({ message: 'email e senha invalidos ' });
-  } catch (error) {
-    return res.status(404).send({ message: error.message });
+  if (comparacoes(email)) {
+    return res.status(400).send({ message: 'O campo "email" é obrigatório' });
   }
+  if (!verificaEm(email)) {
+    return res.status(400).send({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+  if (comparacoes(password)) {
+    return res.status(400).send({ message: 'O campo "password" é obrigatório' });
+  }
+  if (password.length <= 5) {
+    return res.status(400).send({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  const newToken = {
+    token: randomToken(),
+ };
+return res.status(200).json(newToken);
 });
 
 const HTTP_OK_STATUS = 200;
