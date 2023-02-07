@@ -1,31 +1,16 @@
 const express = require('express');
-const fs = require('fs/promises');
-const path = require('path');
-const caract = require('crypto');
+const randomToken = require('./auxi/randomToken');
+const { readJson, writeJson } = require('./auxi/readWrite');
+const validateLog = require('./middlewares/validateLog');
+const validateAut = require('./middlewares/validateAut');
+const { validaNome, 
+ validaIdade, validaTalk, validaWatched, validaRate } = require('./middlewares/validateCamps');
 
 const app = express();
 
-const talkerPath = path.resolve(__dirname, './talker.json');
-
 app.use(express.json());
 
-function randomToken(size = 16) {
-  return caract
-    .randomBytes(size)
-    .toString('base64')
-    .slice(0, size);
-}
-
-const readJson = async () => {
-  try {
-    const talk = await fs.readFile(talkerPath);
-    return JSON.parse(talk);
-  } catch (error) {
-    return null;
-  }
-};
-
-app.get('/talker', async (req, res) => {
+app.get('/talker', async (_req, res) => {
   try {
     let readArq = await readJson();
     if (!readArq) {
@@ -52,34 +37,38 @@ app.get('/talker/:id', async (req, res) => {
   }
 });
 
-const verificaEm = (email) => {
-  const Regex = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$/i;
-  const verifica = Regex.test(email);
-  return verifica;
-};
-const comparacoes = (el) => {
-  const compa = el === null || el === '' || el === undefined;
-  return compa;
-};
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  if (comparacoes(email)) {
-    return res.status(400).send({ message: 'O campo "email" é obrigatório' });
-  }
-  if (!verificaEm(email)) {
-    return res.status(400).send({ message: 'O "email" deve ter o formato "email@email.com"' });
-  }
-  if (comparacoes(password)) {
-    return res.status(400).send({ message: 'O campo "password" é obrigatório' });
-  }
-  if (password.length <= 5) {
-    return res.status(400).send({ message: 'O "password" deve ter pelo menos 6 caracteres' });
-  }
+app.post('/login', validateLog, (_req, res) => {
   const newToken = {
     token: randomToken(),
  };
 return res.status(200).json(newToken);
 });
+
+app.post(
+  '/talker',
+  validateAut,
+  validaNome,
+  validaIdade,
+  validaTalk,
+  validaWatched,
+  validaRate,
+  async (req, res) => {
+    try {
+      const ler = await readJson();
+      const { name, age, talk } = req.body;
+      const newPerso = { 
+      id: ler[ler.length - 1].id + 1, 
+      name, 
+      age, 
+      talk,
+    };
+      await writeJson([...ler, newPerso]);
+      return res.status(201).json(newPerso);
+    } catch (error) {
+      res.status(400).send({ message: error.message });
+    }
+  },
+);
 
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
