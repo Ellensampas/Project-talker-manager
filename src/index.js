@@ -10,18 +10,6 @@ const app = express();
 
 app.use(express.json());
 
-// app.get('/talker/search', validateAut, async (req, res) => {
-//   const { q } = req.query;
-//   const ler = await readJson();
-//   if (!q) {
-//     return res.status(200).json(ler);
-//   }
-//   const
-//   if () {
-//     return res.status(200).json(ler);
-//   }
-// });
-
 app.get('/talker', async (_req, res) => {
   try {
     const readArq = await readJson();
@@ -29,6 +17,19 @@ app.get('/talker', async (_req, res) => {
   } catch (error) {
     return res.status(400).send({ message: error.message });
   }
+});
+
+app.get('/talker/search', validateAut, async (req, res) => {
+  const { q } = req.query;
+  const ler = await readJson();
+  const very = ler.filter((elem) => elem.name.includes(q));
+  if (!very) {
+    return res.status(200).json([]);
+  }
+  if (!q) {
+    return res.status(200).json(ler);
+  }
+  return res.status(200).json(very);
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -105,7 +106,7 @@ app.delete('/talker/:id', validateAut, async (req, res) => {
     const position = ler.findIndex((elem) => elem.id === Number(id));
     ler.splice(position, 1);
     await writeJson(ler);
-    return res.status(204).json();
+    return res.status(204).end();
 });
 
 const HTTP_OK_STATUS = 200;
