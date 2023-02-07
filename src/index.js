@@ -12,11 +12,7 @@ app.use(express.json());
 
 app.get('/talker', async (_req, res) => {
   try {
-    let readArq = await readJson();
-    if (!readArq) {
-      readArq = [];
-      return res.status(200).json(readArq);
-    }
+    const readArq = await readJson();
     return res.status(200).json(readArq);
   } catch (error) {
     return res.status(400).send({ message: error.message });
@@ -25,16 +21,12 @@ app.get('/talker', async (_req, res) => {
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
-  try {
     const readF = await readJson();
     const talkers = readF.find((talk) => talk.id === Number(id));
     if (!talkers) {
       return res.status(404).send({ message: 'Pessoa palestrante não encontrada' });
     }
     res.status(200).json(talkers);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
 });
 
 app.post('/login', validateLog, (_req, res) => {
