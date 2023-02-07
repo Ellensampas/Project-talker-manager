@@ -57,7 +57,7 @@ app.post(
       await writeJson([...ler, newPerso]);
       return res.status(201).json(newPerso);
     } catch (error) {
-      res.status(400).send({ message: error.message });
+      return res.status(400).send({ message: error.message });
     }
   },
 );
@@ -72,22 +72,26 @@ validaRate, async (req, res) => {
   const { id } = req.params;
   const { name, age, talk } = req.body;
   const ler = await readJson();
-  ler[Number(id)] = { 
-    id: Number(id), 
-    name, 
-    age, 
-    talk,
-  };
-  await writeJson(ler);
-  return res.status(200).json(ler[Number(id)]);
+  try {
+    ler[Number(id)] = { 
+      id: Number(id), 
+      name, 
+      age, 
+      talk,
+    };
+    await writeJson(ler);
+    return res.status(200).json(ler[Number(id)]);
+  } catch (error) {
+    return res.status(400).send({ message: error.message });
+  }
 });
 
 app.delete('/talker/:id', validateAut, async (req, res) => {
   const { id } = req.params;
   const ler = await readJson();
-  const filt = ler.filter((elem) => elem.id !== Number(id));
-  await writeJson(filt);
-  return res.status(204).json();
+    const filt = ler.filter((elem) => elem.id !== Number(id));
+    await writeJson(filt);
+    return res.status(204).json();
 });
 
 const HTTP_OK_STATUS = 200;
