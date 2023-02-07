@@ -70,6 +70,27 @@ app.post(
   },
 );
 
+app.put('/talker/:id',
+validateAut,
+validaNome,
+validaIdade,
+validaTalk,
+validaWatched,
+validaRate, async (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  const ler = await readJson();
+  ler[Number(id)] = { 
+    id: Number(id), 
+    name, 
+    age, 
+    talk,
+  };
+
+  await writeJson(ler);
+  return res.status(200).json(ler[Number(id)]);
+});
+
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
