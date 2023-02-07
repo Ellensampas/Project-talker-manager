@@ -91,6 +91,14 @@ validaRate, async (req, res) => {
   return res.status(200).json(ler[Number(id)]);
 });
 
+app.delete('/talker/:id', validateAut, async (req, res) => {
+  const { id } = req.params;
+  const ler = await readJson();
+  const filt = ler.filter((elem) => elem.id !== Number(id));
+  await writeJson(filt);
+  return res.status(204).json();
+});
+
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
