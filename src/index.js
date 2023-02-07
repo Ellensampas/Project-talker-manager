@@ -10,6 +10,18 @@ const app = express();
 
 app.use(express.json());
 
+// app.get('/talker/search', validateAut, async (req, res) => {
+//   const { q } = req.query;
+//   const ler = await readJson();
+//   if (!q) {
+//     return res.status(200).json(ler);
+//   }
+//   const
+//   if () {
+//     return res.status(200).json(ler);
+//   }
+// });
+
 app.get('/talker', async (_req, res) => {
   try {
     const readArq = await readJson();
@@ -73,14 +85,15 @@ validaRate, async (req, res) => {
   const { name, age, talk } = req.body;
   const ler = await readJson();
   try {
-    ler[Number(id)] = { 
-      id: Number(id), 
-      name, 
-      age, 
+    const update = ler.find((ele) => ele.id === Number(id));
+    const newPersos = {
+      id: update.id,
+      name,
+      age,
       talk,
     };
-    await writeJson(ler);
-    return res.status(200).json(ler[Number(id)]);
+    await writeJson([...ler, newPersos]);
+    return res.status(200).json(newPersos);
   } catch (error) {
     return res.status(400).send({ message: error.message });
   }
@@ -89,8 +102,9 @@ validaRate, async (req, res) => {
 app.delete('/talker/:id', validateAut, async (req, res) => {
   const { id } = req.params;
   const ler = await readJson();
-    const filt = ler.filter((elem) => elem.id !== Number(id));
-    await writeJson(filt);
+    const position = ler.findIndex((elem) => elem.id === Number(id));
+    ler.splice(position, 1);
+    await writeJson(ler);
     return res.status(204).json();
 });
 
