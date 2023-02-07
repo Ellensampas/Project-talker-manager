@@ -86,7 +86,6 @@ validaRate, async (req, res) => {
     age, 
     talk,
   };
-
   await writeJson(ler);
   return res.status(200).json(ler[Number(id)]);
 });
